@@ -48,3 +48,4 @@ async fn main() -> form::Result<()> {
 # TODO:
 - DSL for pgsql and sqlite support
 - relationships
+- a little cleanup
