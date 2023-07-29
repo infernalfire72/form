@@ -2,7 +2,7 @@ mod executor;
 mod operation;
 mod select;
 
-pub use macros::Queryable;
+pub use form_macros::Queryable;
 pub use operation::{Operation, Operational};
 pub use select::{SelectQuery, WhereClause, WhereFunction};
 

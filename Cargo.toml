@@ -11,4 +11,4 @@ mysql = []
 
 [dependencies]
 sqlx = { version = "0.7.1", features = ["mysql", "any", "runtime-tokio", "uuid"] }
-macros = { path = "./macros" }
+form-macros = { path = "./macros" }
