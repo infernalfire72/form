@@ -57,6 +57,6 @@ pub type Row = MySqlRow;
 
 // general
 pub use sqlx::{
-    query, query::QueryAs, query_as, types::Uuid, ConnectOptions, Database, FromRow, Result,
-    Row as RowLike,
+    query, query::QueryAs, query_as, types::Uuid, ConnectOptions, Database, Error,
+    FromRow, Result, Row as RowLike,
 };
