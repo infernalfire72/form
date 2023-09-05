@@ -47,6 +47,7 @@ async fn main() -> form::Result<()> {
 
 # TODO:
 - DSL for pgsql and sqlite support
+- proper generics lol
 - automatic schema migration
 - relationships
 - a little cleanup
