@@ -153,7 +153,7 @@ fn queryable_impl(ident: &Ident, struct_data: &DataStruct) -> TokenStream2 {
             pub fn read_params() -> &'static [&'static str] { &[#(stringify!(#parsed_fields), )*] }
             const BASE_SELECT: &'static str = concat!("SELECT ", stringify!(#(#parsed_fields),*), " FROM ", #table_name);
 
-            pub async fn create(&self, pool: &form::Pool) -> form::Result<form::QueryResult> {
+            pub async fn create<'a>(&self, executor: impl form::Executor<'a, Database = form::Protocol>) -> form::Result<form::QueryResult> {
                 #(
                     let #optional_insert_fields =
                         if self.#optional_insert_fields != #optional_insert_field_tys::default() {
@@ -167,24 +167,24 @@ fn queryable_impl(ident: &Ident, struct_data: &DataStruct) -> TokenStream2 {
                 form::query(raw_query)
                     #(.bind(&self.#always_insert_fields))*
                     #(.bind(#optional_insert_fields))*
-                    .execute(pool)
+                    .execute(executor)
                     .await
             }
 
-            pub async fn update(&self, pool: &form::Pool) -> form::Result<form::QueryResult> {
+            pub async fn update<'a>(&self, executor: impl form::Executor<'a, Database = form::Protocol>) -> form::Result<form::QueryResult> {
                 let raw_query = concat!("UPDATE ", #table_name, " SET ", stringify!(#(#update_fields = ?),* WHERE #(#primary_keys = ?) AND *));
                 form::query(raw_query)
                     #(.bind(&self.#update_fields))*
                     #(.bind(&self.#primary_keys))*
-                    .execute(pool)
+                    .execute(executor)
                     .await
             }
 
-            pub async fn delete(&self, pool: &form::Pool) -> form::Result<form::QueryResult> {
+            pub async fn delete<'a>(&self, executor: impl form::Executor<'a, Database = form::Protocol>) -> form::Result<form::QueryResult> {
                 let raw_query = concat!("DELETE FROM ", #table_name, " WHERE ", stringify!(#(#primary_keys = ?) AND *));
                 form::query(raw_query)
                     #(.bind(&self.#primary_keys))*
-                    .execute(pool)
+                    .execute(executor)
                     .await
             }
 

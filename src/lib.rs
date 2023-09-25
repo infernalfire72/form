@@ -36,6 +36,8 @@ pub type ConnectOptions = AnyConnectOptions;
 pub type QueryResult = AnyQueryResult;
 #[cfg(feature = "any")]
 pub type Row = AnyRow;
+#[cfg(feature = "any")]
+pub type Protocol = sqlx::Any;
 
 // mysql
 #[cfg(feature = "mysql")]
@@ -45,6 +47,7 @@ use sqlx::{
 };
 #[cfg(feature = "mysql")]
 pub type Pool = MySqlPool;
+#[cfg(feature = "mysql")]
 pub type PoolOptions = MySqlPoolOptions;
 #[cfg(feature = "mysql")]
 pub type Connection = MySqlConnection;
@@ -55,8 +58,11 @@ pub type QueryResult = MySqlQueryResult;
 #[cfg(feature = "mysql")]
 pub type Row = MySqlRow;
 
+#[cfg(feature = "mysql")]
+pub type Protocol = sqlx::MySql;
+
 // general
 pub use sqlx::{
-    query, query::QueryAs, query_as, types::Uuid, ConnectOptions, Database, Error,
+    query, query::QueryAs, query_as, types::Uuid, ConnectOptions, Database, Error, Executor,
     FromRow, Result, Row as RowLike,
 };
