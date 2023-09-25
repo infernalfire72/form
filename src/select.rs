@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{Operation, Pool, Protocol, Result, Row};
+use crate::{Operation, Protocol, Result, Row};
 
 pub struct SelectQuery<O, M> {
     base_query: &'static str,
@@ -114,7 +114,7 @@ where
 use crate::executor::Executor;
 impl<'a, O, M> SelectQuery<O, M>
 where
-    O: Send + Unpin + for<'r> sqlx::FromRow<'r, Row>,
+    O: 'a + Send + Unpin + for<'r> sqlx::FromRow<'r, Row>,
 {
     pub fn get_executor<E: sqlx::Executor<'a, Database = Protocol>>(
         &self,
@@ -123,15 +123,21 @@ where
         Executor::from(executor)
     }
 
-    pub async fn fetch_one(&mut self, pool: &Pool) -> Result<O> {
+    pub async fn fetch_one(
+        &mut self,
+        executor: impl sqlx::Executor<'a, Database = Protocol>,
+    ) -> Result<O> {
         self.limit_ = 1;
-        self.get_executor(pool)
+        self.get_executor(executor)
             .fetch_one(self.get_query().as_str(), &self.params)
             .await
     }
 
-    pub async fn fetch_all(&mut self, pool: &Pool) -> Result<Vec<O>> {
-        self.get_executor(pool)
+    pub async fn fetch_all(
+        &mut self,
+        executor: impl sqlx::Executor<'a, Database = Protocol>,
+    ) -> Result<Vec<O>> {
+        self.get_executor(executor)
             .fetch_all(self.get_query().as_str(), &self.params)
             .await
     }

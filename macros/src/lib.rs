@@ -57,10 +57,10 @@ fn generate_unique_fetchers(
         let ty = &field.ty;
         let find_name = format_ident!("find_{}", ident);
         quote! {
-            pub async fn #find_name (#ident: #ty, pool: &form::Pool) -> form::Result<#self_ident> {
+            pub async fn #find_name<'a> (#ident: #ty, executor: impl form::Executor<'a, Database = form::Protocol>) -> form::Result<#self_ident> {
                 form::query_as::<_, #self_ident>(concat!(#base_select, " WHERE ", stringify!(#ident), " = ?"))
                     .bind(#ident)
-                    .fetch_one(pool)
+                    .fetch_one(executor)
                     .await
             }
         }
@@ -77,10 +77,10 @@ fn generate_unique_fetchers(
 
         quote! {
             #(#unique_impls)*
-            pub async fn #find_primary (#(#primary_keys: #primary_tys,)* pool: &form::Pool) -> form::Result<#self_ident> {
+            pub async fn #find_primary<'a> (#(#primary_keys: #primary_tys,)* executor: impl form::Executor<'a, Database = form::Protocol>) -> form::Result<#self_ident> {
                 form::query_as::<_, #self_ident>(concat!(#base_select, " WHERE ", stringify!(#(#primary_keys = ?) AND *)))
                     #(.bind(#primary_keys))*
-                    .fetch_one(pool)
+                    .fetch_one(executor)
                     .await
             }
         }
