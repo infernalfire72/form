@@ -6,7 +6,7 @@ pub struct SelectQuery<O, M> {
     base_query: &'static str,
     wheres: Vec<WhereClause>,
     params: Vec<String>,
-    limit_: isize,
+    limit_: Option<(usize, usize)>,
     out: PhantomData<O>,
     mock: PhantomData<M>,
 }
@@ -36,7 +36,7 @@ impl<O, M> SelectQuery<O, M> {
             base_query,
             params: vec![],
             wheres: vec![],
-            limit_: 0,
+            limit_: None,
             out: PhantomData,
             mock: PhantomData,
         }
@@ -51,7 +51,7 @@ impl<O, M> SelectQuery<O, M> {
             base_query,
             params,
             wheres,
-            limit_: 0,
+            limit_: None,
             out: PhantomData,
             mock: PhantomData,
         }
@@ -72,8 +72,8 @@ impl<O, M> SelectQuery<O, M> {
 
     pub fn get_query(&self) -> String {
         let limit = match self.limit_ {
-            0 => String::default(),
-            i => format!("LIMIT {}", i),
+            Some((from, to)) => format!("LIMIT {}, {}", from, to),
+            None => String::default(),
         };
         format!("{}{} {}", self.base_query, self.build_wheres(), limit)
     }
@@ -104,10 +104,15 @@ where
         self
     }
 
-    pub fn limit(&mut self, limit: isize) -> &mut Self {
-        self.limit_ = limit;
-        self
+    pub fn limit(&mut self, limit: usize) -> &mut Self {
+        self.paginate(0, limit)
     }
+	
+	pub fn paginate(&mut self, page: usize, size: usize) -> &mut Self {
+		let offset = page * size;
+		self.limit_ = Some((offset, offset + size));
+		self
+	}
 }
 
 // executor
@@ -127,7 +132,7 @@ where
         &mut self,
         executor: impl sqlx::Executor<'a, Database = Protocol>,
     ) -> Result<O> {
-        self.limit_ = 1;
+        self.limit_ = Some((0, 1));
         self.get_executor(executor)
             .fetch_one(self.get_query().as_str(), &self.params)
             .await

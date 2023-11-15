@@ -15,8 +15,8 @@ fn generate_select_builder_impl(model_ident: &Ident, fields: &Vec<tools::Field>)
             #(pub #fields: form::Operational,)*
         }
 
-        impl #ident {
-            pub fn default() -> Self {
+        impl Default for #ident {
+            fn default() -> Self {
                 Self {
                     #(#fields: form::Operational(stringify!(#fields)),)*
                 }
